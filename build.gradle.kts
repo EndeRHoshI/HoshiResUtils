@@ -12,6 +12,9 @@ repositories {
 }
 
 dependencies {
+    // 处理 Excel 的依赖
+    implementation("org.apache.poi:poi:5.2.2")
+    implementation("org.apache.poi:poi-ooxml:5.2.2")
 }
 
 tasks.withType<KotlinCompile> {
