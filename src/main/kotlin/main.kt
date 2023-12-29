@@ -39,6 +39,9 @@ fun main() {
             // 取得 value 文件夹名，即 res 的父目录，形如 values、value-zh-rCN 这种
             val xmlFileParent = File(xmlPath).parent
             val valueFolderName = xmlFileParent.substring(xmlFileParent.lastIndexOf("\\") + 1, xmlFileParent.length)
+            if (lanCellMap.keys.contains(valueFolderName)) {
+                return@forEach // 如果已经有这一列了，跳过
+            }
             lanCellMap[valueFolderName] = cellIndex // 存储语言和列的映射
             row.createCell(cellIndex++).setCellValue(valueFolderName)
         }
