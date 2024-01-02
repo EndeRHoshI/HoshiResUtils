@@ -88,6 +88,7 @@ fun handleDrawableDelete(allDrawableMap: MutableMap<String, List<String>>, baseD
     // 反向又取出需要处理的目标基准 dpi 的字符串
     val firstBaseDpiFolder = baseDpiFolderList.first()
     val targetBaseDpi = firstBaseDpiFolder.replaceRange(0, firstBaseDpiFolder.lastIndexOf("-") + 1, "")
+    println("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ baseDpi = $targetBaseDpi，开始处理 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓")
     val densityQualifierList = getDensityQualifierList()
 
     allDrawableMap.forEach {
@@ -114,7 +115,7 @@ fun handleDrawableDelete(allDrawableMap: MutableMap<String, List<String>>, baseD
             }
 
             // 如果文件夹名即 key 不包含基准 api 字符串，说明不是基准 api，要删除掉基准 api 文件夹中已有重名的文件
-            println("当前处理的 $currentFolderName 文件夹是非基准文件夹，准备处理")
+            println("↓ $currentFolderName 是非基准文件夹，开始处理 ↓")
 
             val targetFolderName = currentFolderName.replaceAfterLast("-", targetBaseDpi) // 取得目标文件名
             it.value.forEach { drawableFilePath ->
@@ -132,9 +133,10 @@ fun handleDrawableDelete(allDrawableMap: MutableMap<String, List<String>>, baseD
                     }
                 }
             }
+            println("↑ $currentFolderName 文件夹处理完毕 ↑")
         }
     }
-    println(" ========================= baseDpi = $targetBaseDpi，处理完毕 ========================= ")
+    println("↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ baseDpi = $targetBaseDpi，处理完毕 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑")
 }
 
 /**
