@@ -1,3 +1,5 @@
+package drawable
+
 import java.io.File
 import java.util.regex.Pattern
 
@@ -95,12 +97,16 @@ fun handleDrawableDelete(allDrawableMap: MutableMap<String, List<String>>, baseD
             // 如果文件夹名即 key 包含基准 api 字符串，说明是基准 api，无需处理
             println("当前处理的 $currentFolderName 文件夹是基准文件夹，无需处理")
         } else {
-            val currentDpiPriority = densityQualifierList.first { densityQualifier -> // 取得当前 dpi 的优先级
+            val currentDpiPriority = densityQualifierList.firstOrNull { densityQualifier -> // 取得当前 dpi 的优先级
                 densityQualifier.strValue == currentDpiStrValue
-            }.priority
-            val targetDpiPriority = densityQualifierList.first { densityQualifier -> // 取得目标 dpi 的优先级
+            }?.priority
+            val targetDpiPriority = densityQualifierList.firstOrNull { densityQualifier -> // 取得目标 dpi 的优先级
                 densityQualifier.strValue == targetBaseDpi
-            }.priority
+            }?.priority
+            if (currentDpiPriority == null || targetDpiPriority == null) {
+                println("当前遍历到的优先级 currentDpiPriority = $currentDpiPriority，targetDpiPriority = $targetDpiPriority，其中有 null，说明不在需要处理的像素密度列表中，不处理了")
+                return@forEach
+            }
             if (currentDpiPriority > targetDpiPriority) {
                 println("当前遍历到的优先级 $currentDpiPriority 比目标基准优先级 $targetDpiPriority 高了，不用处理了")
                 return@forEach

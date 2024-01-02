@@ -1,3 +1,5 @@
+package string
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -5,8 +7,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 fun main() {
-    val originPath = "D:\\WorkSpace\\work-main\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
-    // val targetPath = "D:\\WorkSpace\\work-main\\Ddpai_app\\res\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+    val originPath = "D:\\WorkSpace\\work-string.main\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+    // val targetPath = "D:\\WorkSpace\\work-string.main\\Ddpai_app\\res\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
     val allStringFileList = mutableListOf<String>() // 在外部创建一个列表，遍历时把找到的 string.xml 文件路径放进去
     Utils.findAllStringFiles(originPath, allStringFileList)
 
