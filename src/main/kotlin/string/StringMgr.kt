@@ -5,12 +5,14 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Pattern
+import javax.xml.parsers.DocumentBuilderFactory
 
 fun main() {
-    val originPath = "D:\\WorkSpace\\work-string.main\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
-    // val targetPath = "D:\\WorkSpace\\work-string.main\\Ddpai_app\\res\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+    val originPath = "D:\\WorkSpace\\work-main\\" // 在这里输入整个项目或者单独某个 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+    // val targetPath = "D:\\WorkSpace\\work-main\\Ddpai_app\\res\\" // 在这里输入整个项目或者单独某个 res 文件夹的路径，注意文件夹的结尾都要加斜杠
     val allStringFileList = mutableListOf<String>() // 在外部创建一个列表，遍历时把找到的 string.xml 文件路径放进去
-    Utils.findAllStringFiles(originPath, allStringFileList)
+    findAllStringFiles(originPath, allStringFileList)
 
     println("共找到 " + allStringFileList.size + " 个 string.xml 文件")
 
@@ -37,43 +39,58 @@ fun main() {
         lanCellMap["name"] = cellIndex // 存储 name 列和列下标的映射
         row.createCell(cellIndex++).setCellValue("name")
 
-        resPathList.forEach { xmlPath ->
-            // 取得 value 文件夹名，即 res 的父目录，形如 values、value-zh-rCN 这种
-            val xmlFileParent = File(xmlPath).parent
-            val valueFolderName = xmlFileParent.substring(xmlFileParent.lastIndexOf("\\") + 1, xmlFileParent.length)
+        val allXmlStringList = resPathList.flatMap { xmlPath -> readStringFromXml(xmlPath, folderName) }
+        val valueFolderMap = allXmlStringList.groupBy { xmlString -> xmlString.valueFolderName }
+
+        valueFolderMap.forEach { mapEntry ->
+            val valueFolderName = mapEntry.key
             if (lanCellMap.keys.contains(valueFolderName)) {
                 return@forEach // 如果已经有这一列了，跳过
             }
             lanCellMap[valueFolderName] = cellIndex // 存储语言和列的映射
             row.createCell(cellIndex++).setCellValue(valueFolderName)
         }
-        resPathList.forEach { xmlPath ->
-            // 取得 value 文件夹名，即 res 的父目录，形如 values、value-zh-rCN 这种
-            val xmlFileParent = File(xmlPath).parent
-            val valueFolderName = xmlFileParent.substring(xmlFileParent.lastIndexOf("\\") + 1, xmlFileParent.length)
-            val xmlStringList = Utils.readStringFromXml(xmlPath, folderName) // 从对应的 xml 文件路径中读出各个 string 键值对
-            rowIndex = 1 // 行数重置回 1
-            xmlStringList.forEach { xmlString ->
-                row = sheet.getRow(rowIndex)
-                if (row == null) {
-                    row = sheet.createRow(rowIndex)
-                }
-                rowIndex++
-                row.createCell(0).setCellValue(xmlString.fileName)
-                row.createCell(1).setCellValue(xmlString.name)
 
-                val textCellIndex = lanCellMap[valueFolderName]
-                if (textCellIndex != null) {
-                    row.createCell(textCellIndex).setCellValue(xmlString.text)
+        val baseCellName = "values"
+        if (valueFolderMap.containsKey(baseCellName)) {
+            // 如果有基准列才继续处理，否则是不合法的，不用管了
+            val baseList = valueFolderMap[baseCellName] // 取得基准列的各个项，后面用来给其它列找下标
+            if (baseList != null) {
+                valueFolderMap.forEach { mapEntry ->
+                    val valueFolderName = mapEntry.key
+                    val xmlStringList = mapEntry.value
+                    rowIndex = 1 // 将行数重置回 1
+                    xmlStringList.forEach { xmlString ->
+                        // 如果是基准列，需要从头到尾进行填入内容
+                        if (valueFolderName != baseCellName) {
+                            // 如果不是基准列，需要找到对应的行来填入内容
+                            rowIndex = baseList.indexOfFirst { baseXmlString -> xmlString.name == baseXmlString.name } + 1
+                        }
+                        if (rowIndex < 0) {
+                            return@forEach
+                        }
+                        row = sheet.getRow(rowIndex)
+                        if (row == null) {
+                            row = sheet.createRow(rowIndex)
+                        }
+                        if (valueFolderName == baseCellName) {
+                            rowIndex++
+                        }
+                        row.createCell(0).setCellValue(xmlString.fileName)
+                        row.createCell(1).setCellValue(xmlString.name)
+
+                        val textCellIndex = lanCellMap[valueFolderName]
+                        if (textCellIndex != null) {
+                            row.createCell(textCellIndex).setCellValue(xmlString.text)
+                        }
+                    }
                 }
             }
         }
-
-
     }
 
-    val targetFileName: String? = null
-    val targetFolderPath = "D:\\res\\" // 在这里输入你想要导出为 excel 的路径，注意文件夹的结尾都要加斜杠// 拼装文件名和路径
+    val targetFileName: String? = null // 在这里输入你想要导出的 Excel 的名称，不输入则默认用当前时间格式化作为名称
+    val targetFolderPath = "D:\\res\\" // 在这里输入你想要导出为 Excel 的路径，注意文件夹的结尾都要加斜杠// 拼装文件名和路径
     val sdf = SimpleDateFormat("yyyyMMddHHmmss")
     val excelName = (targetFileName ?: sdf.format(Date())) + ".xlsx"
     val excelPath = targetFolderPath + excelName
@@ -91,4 +108,65 @@ fun main() {
 
     val isFullRead = false // 是否全部读取，true 全部读取，false 只读取未翻译的部分
 
+}
+
+/**
+ * 找到所有 string.xml 文件
+ */
+fun findAllStringFiles(projectPath: String, allStringFileList: MutableList<String>): MutableList<String> {
+    File(projectPath).listFiles()?.forEach {
+        if (it.isDirectory) {
+            // 如果是一个文件夹，再往下找
+            findAllStringFiles(it.absolutePath, allStringFileList)
+        } else {
+            // 文件名规则：带有 string.xml 的文件名，string 前或后可以有其它字符，但是一定要 .xml 结尾
+            val fileNamePattern = Pattern.compile("^\\S*string\\S*.xml\$")
+            val fileNameMatcher = fileNamePattern.matcher(it.name)
+            // 文件路径规则：在 values 目录下，包括 values-xxx 目录
+            if (fileNameMatcher.find() && it.absolutePath.contains("\\values")) {
+                // 文件名和文件路径匹配成功，添加到列表中
+                // println(it.absolutePath)
+                allStringFileList.add(it.absolutePath)
+            }
+        }
+    }
+    return allStringFileList
+}
+
+fun readStringFromXml(xmlFilePath: String?, folderName: String): List<XmlString> {
+    if (xmlFilePath.isNullOrEmpty()) {
+        println("目标 Xml 路径为空，请检查")
+        return listOf()
+    }
+    val xmlFile = File(xmlFilePath)
+    return readStringFromXml(xmlFile, folderName)
+}
+
+fun readStringFromXml(xmlFile: File?, folderName: String): List<XmlString> {
+    val resultList = mutableListOf<XmlString>()
+    if (xmlFile == null || !xmlFile.exists()) {
+        println("目标 Xml 文件为空或不存在，请检查")
+        return resultList.toList()
+    }
+
+    // 取得 value 文件夹名，即 res 的父目录，形如 values、value-zh-rCN 这种
+    val xmlFileParent = xmlFile.parent
+    val valueFolderName = xmlFileParent.substring(xmlFileParent.lastIndexOf("\\") + 1, xmlFileParent.length)
+
+    val fileName = xmlFile.name
+    val factory = DocumentBuilderFactory.newInstance()
+    val builder = factory.newDocumentBuilder() // 获取解析对象
+    val document = builder.parse(xmlFile) // 对象解析文件
+    val rootElement = document.documentElement // 获取root节点
+    val nodeList = rootElement.getElementsByTagName("string") // 获取父节点下面所有 string 元素节点
+    for (i in 0 until nodeList.length) {
+        val node = nodeList.item(i)
+        val nodeAttributes = node.attributes
+        val name = nodeAttributes.getNamedItem("name").nodeValue
+        val translatable =
+            nodeAttributes.getNamedItem("translatable")?.textContent?.toBoolean() ?: true // 如果取不到，直接赋值为 true
+        val xmlString = XmlString(folderName, fileName, valueFolderName, name, node.textContent, translatable)
+        resultList.add(xmlString)
+    }
+    return resultList.toList()
 }

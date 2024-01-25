@@ -14,7 +14,8 @@ private var deleteNum = 0
  * 详见文章：https://www.jianshu.com/p/0eb2824d6011
  */
 fun main() {
-    val resPath = "D:\\WorkSpace\\work-main\\Ddpai_app\\res\\" // 在这里输入项目或者 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+    val resPath = "D:\\WorkSpace\\work-main\\Ddpai_app\\res\\" // 在这里输入 res 文件夹的路径，注意文件夹的结尾都要加斜杠
+
     val allDrawableMap = mutableMapOf<String, List<String>>() // 在外部创建一个列表，key -> 对应的文件夹，value -> 对应的图片资源文件路径列表
     findAllDrawableFiles(resPath, allDrawableMap)
     fileNumBeforeDelete = allDrawableMap.flatMap { it.value }.size
@@ -76,7 +77,7 @@ fun findAllDrawableFiles(resPath: String, allDrawableMap: MutableMap<String, Lis
  */
 fun handleDrawableDelete(allDrawableMap: MutableMap<String, List<String>>, baseDpiFolderList: List<String>) {
     if (baseDpiFolderList.isEmpty()) {
-        println("基准 dpi 文件夹列表为空，不应该存在这种情况，请检查以下")
+        println("基准 dpi 文件夹列表为空，不应该存在这种情况，请检查一下")
         return
     }
     val baseFolderFileNameMap = mutableMapOf<String, List<String>>() // key -> 基准文件夹名，value -> 基准文件夹下的文件名列表
