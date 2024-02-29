@@ -8,6 +8,9 @@ import java.util.*
 import java.util.regex.Pattern
 import javax.xml.parsers.DocumentBuilderFactory
 
+/**
+ * String 资源的管理
+ */
 fun main() {
     val originPath = "D:\\WorkSpace\\work-main\\" // 在这里输入整个项目或者单独某个 res 文件夹的路径，注意文件夹的结尾都要加斜杠
     // val targetPath = "D:\\WorkSpace\\work-main\\Ddpai_app\\res\\" // 在这里输入整个项目或者单独某个 res 文件夹的路径，注意文件夹的结尾都要加斜杠
