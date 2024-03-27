@@ -10,4 +10,24 @@ data class XmlString(
     val name: String, // 字符串的 key
     val text: String, // 字符串的 value
     val translatable: Boolean = true, // translatable 属性读取到的值，不写就默认是 true
-)
+    @Deprecated("适配 ddp 规则，后续无用，可以移除") val check: Int = -100,
+    @Deprecated("适配 ddp 规则，后续无用，可以移除")  val trans: Int = -100,
+) {
+
+    fun getText(isWrite2AndroidXml: Boolean): String {
+        if (!isWrite2AndroidXml) {
+            return text
+        }
+        // 1.replace 将"'" 直接换成\'
+        // 1.replace 将\' 直接换成'
+        // 1.replace 将' 直接换成\'
+        var s = text + ""
+        s = s.replace("\"'\"", "'")
+        s = s.replace("\\\'", "'")
+        s = s.replace("\\'", "'")
+        s = s.replace("\'", "'")
+        s = s.replace("'", "\\'")
+        return s
+    }
+
+}
