@@ -52,10 +52,11 @@ Android 资源管理工具
    5. 可以看下相关文章：[Android 本地化适配：RTL（right-to-left） 适配清单 ](https://www.cnblogs.com/plokmju/p/android_rtl.html)
 3. Span 的高亮文案，翻译不当会导致不能正确高亮，高亮翻译时，可以在全文中使用不会被翻译到的字符（如阿拉伯数字）代替需要高亮的部分，翻译好高亮部分再套进去即可
 4. 阿拉伯语言环境下进行数字格式化，会将原来的数字符号转化为阿拉伯文数字，引发各种问题，关于阿拉伯文数字，可看 [wiki](https://zh.wikipedia.org/wiki/%E9%98%BF%E6%8B%89%E4%BC%AF%E6%96%87%E6%95%B0%E5%AD%97)，想要规避的话，将格式化的环境固定为英文环境即可（`SimpleDateFormat(pattern, Locale.ENGLISH)`）
-5. 文案最好要有相关人员审核，否则会出现各种问题
+5. 土耳其语的 I 转换小写会变成 ı，没有了那一点，会导致 equals 或者 startWith 这种判断达不到预期效果，可以将格式化的环境固定为英文环境（使用 `.toLowerCase(Locale.ENGLISH)` 或 `.toLowerCase(Locale.US)` 来解决，或者使用 `.toLowerCase(Locale.ROOT)`，还可以使用 `.equalsIgnoreCase(xxx)` 来处理），可参考[文章](https://juejin.cn/post/6844903749094211592)
+6. 文案最好要有相关人员审核，否则会出现各种问题
    1. 机翻不通顺是最常见的
    2. 如果是客户自愿提供翻译的，有些内容错误无法把关（漏翻译、或者错误翻译）
-6. 文案的版本管理要注意，举个例子，送出去翻译后，改了一些文案，翻译回来后，又没及时更新，把旧的文案又覆盖上去了
+7. 文案的版本管理要注意，举个例子，送出去翻译后，改了一些文案，翻译回来后，又没及时更新，把旧的文案又覆盖上去了
 
 ### 参考项目
 大牛做的相关系统：[国际化翻译系统V2正式上线了](https://mp.weixin.qq.com/s/M8bTBqstag3ioJg-1DjtOw)
