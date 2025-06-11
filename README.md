@@ -49,7 +49,8 @@ Android 资源管理工具
    2. 处理格式化占位符（%s、%d 等）时，编译可能不会报错，但是到了特定页面无法正确处理占位符（读成了s%）而导致闪退，实践中发现好像如果被夹在希伯来语中间就需要改成 s%，如果不是则不用，还需要再测试一下，最简单直接的处理手段：直接删掉，然后手打 %s，让他自己排版；除了格式化占位符问题，RTL 布局也是个问题，这个要做得很好，应该需要 UI 介入，是题外话了
    3. 在设置 gravity 时，要记得设置水平方向的 gravity（忘记为什么了，后续遇到可以再说明下），使用 left、right 相关属性时，用 start、end 替代
    4. RecyclerView 的 reverseLayout 参数可以根据是否 RTL 布局来进行设置，如果整个页面都不需要 RTL，可以配置 `android:layoutDirection="ltr"`
-   5. 可以看下相关文章：[Android 本地化适配：RTL（right-to-left） 适配清单 ](https://www.cnblogs.com/plokmju/p/android_rtl.html)
+   5. 注意某些软件打开 Excel 表格，下方的表格框渲染不一定是正确的，它有可能是反过来的，正确的书写方向要看上方的文本编辑框才行，如果实在不能确认的话，可以复制文本，粘贴到浏览器地址栏看看，或者直接 Google 翻译一下看是否正确。如果发现 TextView 的内容怎么都不正确，可以尝试将 TextView 的 textDirection 改成 anyRTL 再试试
+   6. 可以看下相关文章：[Android 本地化适配：RTL（right-to-left） 适配清单 ](https://www.cnblogs.com/plokmju/p/android_rtl.html)
 3. Span 的高亮文案，翻译不当会导致不能正确高亮，高亮翻译时，可以在全文中使用不会被翻译到的字符（如阿拉伯数字）代替需要高亮的部分，翻译好高亮部分再套进去即可
 4. 阿拉伯语言环境下进行数字格式化，会将原来的数字符号转化为阿拉伯文数字，引发各种问题，关于阿拉伯文数字，可看 [wiki](https://zh.wikipedia.org/wiki/%E9%98%BF%E6%8B%89%E4%BC%AF%E6%96%87%E6%95%B0%E5%AD%97)，想要规避的话，将格式化的环境固定为英文环境即可（`SimpleDateFormat(pattern, Locale.ENGLISH)`）
 5. 土耳其语的 I 转换小写会变成 ı，没有了那一点，会导致 equals 或者 startWith 这种判断达不到预期效果，可以将格式化的环境固定为英文环境（使用 `.toLowerCase(Locale.ENGLISH)` 或 `.toLowerCase(Locale.US)` 来解决，或者使用 `.toLowerCase(Locale.ROOT)`，还可以使用 `.equalsIgnoreCase(xxx)` 来处理），可参考[文章](https://juejin.cn/post/6844903749094211592)
